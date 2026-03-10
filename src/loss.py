@@ -1,22 +1,28 @@
 import math
+import numpy as np
 
 class MSE:
     def forward(self, predicted, actual):
-        vector = [(actual[i] - predicted[i])**2 for i in range(len(predicted))]
-        return sum(vector) / len(vector)
+        return np.mean((actual - predicted) ** 2)
     def derivative(self, predicted, actual):
         return 2 * (predicted - actual) / len(predicted)
     
 class BinaryCrossEntropy:
     def forward(self, predicted, actual):
-        vector = [(actual[i] * math.log(predicted[i]) + (1 - actual[i]) * math.log(1 - predicted[i])) for i in range(len(predicted))]
-        return -sum(vector) / len(vector)
+        eps = 1e-15
+        predicted = np.clip(predicted, eps, 1 - eps)
+        loss = actual * np.log(predicted) + (1 - actual) * np.log(1 - predicted)
+        return -np.mean(loss)
+
     def derivative(self, predicted, actual):
         return predicted - actual
     
 class CategoricalCrossEntropy:
     def forward(self, predicted, actual):
-        vector = [actual[i] * math.log(predicted[i]) for i in range(len(predicted))]
-        return -sum(vector) / len(vector)
+        eps = 1e-15
+        predicted = np.clip(predicted, eps, 1 - eps)
+        loss = actual * np.log(predicted)
+        return -np.mean(np.sum(loss, axis=1))
+
     def derivative(self, predicted, actual):
         return predicted - actual
