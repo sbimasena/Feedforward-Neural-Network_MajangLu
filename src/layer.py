@@ -2,10 +2,12 @@ import numpy as np
 import random
 
 class DenseLayer:
-    def __init__(self, input_size, output_size, activation, init_method, init_params=None):
+    def __init__(self, input_size, output_size, activation, init_method, init_params=None, regularization=None, lambda_reg=0.0):
         self.input_size = input_size
         self.output_size = output_size
         self.activation = activation
+        self.regularization = regularization
+        self.lambda_reg = lambda_reg
 
         if init_params is None:
             init_params = {}
@@ -57,6 +59,11 @@ class DenseLayer:
         return grad_input
 
     def update(self, learning_rate):
+        if self.regularization == "l1":
+            self.grad_weights += self.lambda_reg * np.sign(self.weights)
+        elif self.regularization == "l2":
+            self.grad_weights += self.lambda_reg * self.weights
+            
         self.weights -= learning_rate * self.grad_weights
         self.bias -= learning_rate * self.grad_bias
         
