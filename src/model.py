@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 
 class Neural_Network:
     def __init__(self):
@@ -24,6 +25,88 @@ class Neural_Network:
 
     def predict(self, x):
         return self.forward(x)
+
+    def save_model(self, filepath: str) -> None:
+        with open(filepath, 'wb') as f:
+            pickle.dump(self, f)
+        print(f"Model saved to '{filepath}'")
+
+    @staticmethod
+    def load_model(filepath: str) -> "Neural_Network":
+        with open(filepath, 'rb') as f:
+            model = pickle.load(f)
+        print(f"Model loaded from '{filepath}'")
+        return model
+
+    def _get_dense_layers(self, layer_indices=None):
+        dense = [(i, l) for i, l in enumerate(self.layers) if hasattr(l, 'weights')]
+        if layer_indices is not None:
+            dense = [dense[k] for k in layer_indices]
+        return dense
+
+    def plot_weight_distribution(self, layer_indices=None, figsize=None):
+        dense = self._get_dense_layers(layer_indices)
+        if not dense:
+            print("Tidak ada layer dengan bobot.")
+            return
+
+        n = len(dense)
+        fig, axes = plt.subplots(1, n, figsize=figsize or (5 * n, 4))
+        if n == 1:
+            axes = [axes]
+
+        for ax, (orig_idx, layer) in zip(axes, dense):
+            w = layer.weights.flatten()
+            act_name = type(layer.activation).__name__
+            ax.hist(w, bins=30, color="steelblue", edgecolor="black", alpha=0.75)
+            ax.axvline(w.mean(), color="red", linestyle="--", linewidth=1.5,
+                       label=f"μ={w.mean():.4f}")
+            ax.axvline(w.mean() - w.std(), color="orange", linestyle=":", linewidth=1.2)
+            ax.axvline(w.mean() + w.std(), color="orange", linestyle=":", linewidth=1.2,
+                       label=f"σ={w.std():.4f}")
+            ax.set_title(f"Layer {orig_idx + 1} [{act_name}]\nWeight Distribution")
+            ax.set_xlabel("Weight value")
+            ax.set_ylabel("Frequency")
+            ax.legend(fontsize=8)
+
+        plt.suptitle("Weight Distributions", fontsize=13, fontweight="bold")
+        plt.tight_layout()
+        plt.show()
+
+    def plot_gradient_distribution(self, layer_indices=None, figsize=None):
+        dense_with_grads = [
+            (i, l) for i, l in enumerate(self.layers)
+            if hasattr(l, 'grad_weights') and l.grad_weights is not None
+        ]
+        if not dense_with_grads:
+            print("Gradien belum tersedia. Jalankan minimal satu training step terlebih dahulu.")
+            return
+
+        if layer_indices is not None:
+            dense_with_grads = [dense_with_grads[k] for k in layer_indices]
+
+        n = len(dense_with_grads)
+        fig, axes = plt.subplots(1, n, figsize=figsize or (5 * n, 4))
+        if n == 1:
+            axes = [axes]
+
+        for ax, (orig_idx, layer) in zip(axes, dense_with_grads):
+            g = layer.grad_weights.flatten()
+            act_name = type(layer.activation).__name__
+            ax.hist(g, bins=30, color="darkorange", edgecolor="black", alpha=0.75)
+            ax.axvline(g.mean(), color="red", linestyle="--", linewidth=1.5,
+                       label=f"μ={g.mean():.4f}")
+            ax.axvline(g.mean() - g.std(), color="royalblue", linestyle=":", linewidth=1.2)
+            ax.axvline(g.mean() + g.std(), color="royalblue", linestyle=":", linewidth=1.2,
+                       label=f"σ={g.std():.4f}")
+            ax.set_title(f"Layer {orig_idx + 1} [{act_name}]\nGradient Distribution")
+            ax.set_xlabel("Gradient value")
+            ax.set_ylabel("Frequency")
+            ax.legend(fontsize=8)
+
+        plt.suptitle("Gradient Distributions", fontsize=13, fontweight="bold")
+        plt.tight_layout()
+        plt.show()
 
     def train(self, x, y, loss, epochs, learning_rate, batch_size,
               x_val=None, y_val=None, verbose=0):
