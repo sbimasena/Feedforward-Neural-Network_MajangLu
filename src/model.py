@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 class Neural_Network:
     def __init__(self):
@@ -23,47 +24,52 @@ class Neural_Network:
 
     def predict(self, x):
         return self.forward(x)
-    
-    def train(self, x, y, loss, epochs, learning_rate, batch_size, x_val=None, y_val=None, verbose=0):
-        history = {
-            "train_loss": [],
-            "val_loss": []
-        }
+
+    def train(self, x, y, loss, epochs, learning_rate, batch_size,
+              x_val=None, y_val=None, verbose=0):
+        history = {"train_loss": [], "val_loss": []}
+        n_batches = int(np.ceil(len(x) / batch_size))
+        bar_width = 30
 
         for epoch in range(epochs):
             indices = np.arange(len(x))
             np.random.shuffle(indices)
-            
             x = x[indices]
             y = y[indices]
 
-            for start in range(0, len(x), batch_size):
+            for batch_idx, start in enumerate(range(0, len(x), batch_size)):
                 end = min(start + batch_size, len(x))
                 x_batch = x[start:end]
                 y_batch = y[start:end]
 
                 predictions = self.forward(x_batch)
-                grad_loss = loss.derivative(predictions, y_batch)
-
+                grad_loss   = loss.derivative(predictions, y_batch)
                 self.backward(grad_loss)
-
                 self.update(learning_rate)
-            
-            train_pred = self.predict(x)
-            train_loss = loss.forward(train_pred, y)
+
+                if verbose == 1:
+                    filled  = int(bar_width * (batch_idx + 1) / n_batches)
+                    bar     = "=" * filled + "-" * (bar_width - filled)
+                    print(f"\rEpoch {epoch+1}/{epochs} [{bar}] "
+                          f"batch {batch_idx+1}/{n_batches}", end="", flush=True)
+
+            train_loss = loss.forward(self.predict(x), y)
             history["train_loss"].append(train_loss)
-            
+
+            val_loss = None
             if x_val is not None:
-                val_pred = self.predict(x_val)
-                val_loss = loss.forward(val_pred, y_val)
+                val_loss = loss.forward(self.predict(x_val), y_val)
                 history["val_loss"].append(val_loss)
-                
+
             if verbose == 1:
-                if x_val is not None:
-                    print(f"Epoch {epoch+1}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-                else:
-                    print(f"Epoch {epoch+1}/{epochs}, Train Loss: {train_loss:.4f}")
-                
+                filled = bar_width
+                bar    = "=" * filled
+                metrics = f"loss: {train_loss:.4f}"
+                if val_loss is not None:
+                    metrics += f" - val_loss: {val_loss:.4f}"
+                print(f"\rEpoch {epoch+1}/{epochs} [{bar}] {metrics}",
+                      flush=True)
+
         return history
                 
                 
