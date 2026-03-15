@@ -18,7 +18,7 @@ class BinaryCrossEntropy:
         eps = 1e-15
         predicted = np.clip(predicted, eps, 1 - eps)
         N = len(predicted)
-        return -(predicted - actual) / (predicted * (1 - predicted) * N)
+        return (predicted - actual) / (predicted * (1 - predicted) * N)
     
 class CategoricalCrossEntropy:
     def forward(self, predicted, actual):
