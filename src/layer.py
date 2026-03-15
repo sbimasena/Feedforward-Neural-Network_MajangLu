@@ -42,6 +42,32 @@ class DenseLayer:
                 np.random.seed(seed)
 
             return np.random.normal(mean, np.sqrt(var), (self.input_size, self.output_size))
+        elif init_method == "xavier":
+            seed = init_params.get("seed", None)
+            distribution = init_params.get("distribution", "normal")
+
+            if seed is not None:
+                np.random.seed(seed)
+
+            if distribution == "uniform":
+                limit = np.sqrt(6.0 / (self.input_size + self.output_size))
+                return np.random.uniform(-limit, limit, (self.input_size, self.output_size))
+
+            std = np.sqrt(2.0 / (self.input_size + self.output_size))
+            return np.random.normal(0.0, std, (self.input_size, self.output_size))
+        elif init_method == "he":
+            seed = init_params.get("seed", None)
+            distribution = init_params.get("distribution", "normal")
+
+            if seed is not None:
+                np.random.seed(seed)
+
+            if distribution == "uniform":
+                limit = np.sqrt(6.0 / self.input_size)
+                return np.random.uniform(-limit, limit, (self.input_size, self.output_size))
+
+            std = np.sqrt(2.0 / self.input_size)
+            return np.random.normal(0.0, std, (self.input_size, self.output_size))
         else:
             raise ValueError("Invalid init_method") 
 
