@@ -39,3 +39,24 @@ class Softmax:
     def derivative(self, x):
         softmax_x = self.forward(x)
         return softmax_x * (1.0 - softmax_x)
+
+class LeakyReLU:
+    def __init__(self, alpha=0.01):
+        self.alpha = alpha
+
+    def forward(self, x):
+        return np.where(x > 0, x, self.alpha * x)
+    
+    def derivative(self, x):
+        return np.where(x > 0, 1.0, self.alpha)
+    
+
+class ELU:
+    def __init__(self, alpha=1.0):
+        self.alpha = alpha
+
+    def forward(self, x):
+        return np.where(x > 0, x, self.alpha * (np.exp(x) - 1))
+    
+    def derivative(self, x):
+        return np.where(x > 0, 1.0, self.forward(x) + self.alpha)
