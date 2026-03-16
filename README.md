@@ -94,8 +94,8 @@ Agar hasil tetap konsisten saat rerun:
 
 ## Pembuat
 
-| Nama                             | NIM      |
-|----------------------------------|----------|
-| Wardatul Khoiroh                 | 13523001 |
-| Indah Novita Tangdililing        | 13523047 |
-| Sakti Bimasena                   | 13523053 |
+| Nama                             | NIM      | Tugas |
+|----------------------------------|----------|----------------------|
+| Wardatul Khoiroh                 | 13523001 | Mengimplementasikan fungsi Loss dan turunan pertamanya, inisialisasi bobot, mekanisme regulasi L1 dan L2, serta fungsi pelengkap dan bonus init bobot|
+| Indah Novita Tangdililing        | 13523047 | Melakukan pemrosesan dataset di file Jupyter Notebook, Menjalankan eksperimen hyperparameter, regularisasi, dan perbandingan MLPClassifier|
+| Sakti Bimasena                   | 13523053 | Membuat model utama FFNN dan kelas-kelasnya, Bonus Fungsi Aktivasi|
